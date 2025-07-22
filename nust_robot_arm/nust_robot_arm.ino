@@ -16,9 +16,9 @@ const int base_pin = 5;
 int pwm_pungt = 100;
 void setup()
 {
-  skulle.attach(2); // pwm 25-190 -> vinkel -45 - 70 
-  albuge.attach(3); // pwm 0 -150 -> vinkel  30 - 150
-  klo.attach(4);    // pwm 40-190 -> vinkel   0 - 80
+  skulle.attach( 2, 25, 190); // pwm 25-190 -> vinkel -45 - 70 
+  albuge.attach( 3,  0, 150); // pwm 0 -150 -> vinkel  30 - 150
+  klo.attach   ( 4, 40, 80 );    // pwm 40-190 -> vinkel   0 - 80
   
   skulle.write(110);
   albuge.write(110);
@@ -30,6 +30,8 @@ void setup()
 
 void loop()
 {
+  
+  /*
   for(int i = 0; i < 255; i++)
   {
     albuge.write(i);
@@ -37,7 +39,8 @@ void loop()
     delay(100);
 
   }
-  /*
+  
+  */
   for(int i = 0; i < 255; i++)
   {
     skulle.write(i);
@@ -52,5 +55,4 @@ void loop()
     klo.write(i);
     delay(20);
   }
-  */
 }
