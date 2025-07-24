@@ -55,18 +55,20 @@ tmm::Matrix<4,4> trans_m(float x, float y, float z){
 	return m_trans;
 }
 
-tmm::Matrix<4,4> forvert_kinmatik(float base, float skuller, float albuge)
-{
-	return trans_m(0, 0, base_link)* rot_z(base) * rot_x(skuller) * trans_m(0, 0, uper_arm_link) * rot_x(albuge) * trans_m(0, 0, under_arm_link) * rot_x(-(albuge+skuller));
-}
 
 struct arm_fon_fig
 {
-	float base;
-	float skuller;
-	float albuge;
-	float klo;
+  float base;
+  float skuller;
+  float albuge;
+  float klo;
 };
+
+//tmm::Matrix<4,4> forvert_kinmatik(float base, float skuller, float albuge)
+tmm::Matrix<4,4> forvert_kinmatik(struct arm_fon_fig arm)
+{
+	return trans_m(0, 0, base_link) * rot_z(arm.base) * rot_x(arm.skuller) * trans_m(0, 0, uper_arm_link) * rot_x(arm.albuge) * trans_m(0, 0, under_arm_link) * rot_x(-(arm.albuge+arm.skuller));
+}
 
 float extrag_skaler(tmm::Matrix<4,4> m, int x, int y)
 {
@@ -119,24 +121,49 @@ void setup()
 	E.printTo(Serial);
 	l = tmm::Identity<4>();
 }
+
+void print_arm(struct arm_fon_fig a, String pra_fix)
+{
+	Serial.print(pra_fix);
+	Serial.print("b:");
+	Serial.print(a.base);
+	Serial.print("\t s:");
+	Serial.print(a.skuller);
+	Serial.print("\t a:");
+	Serial.print(a.albuge);
+	Serial.print("\t k:");
+	Serial.print(a.klo);
+	Serial.print("\n");
+}
+
+
 void loop()
 {
+  for(float b = -PI; b < PI; b = b +0.1)
+    for(float s = -PI; s < PI; s = s +0.1)
+      for(float a = -PI; a < PI; s = a +0.1)
+      {
+        struct arm_fon_fig arm = {b,s,a,0};
+	tmm::Matrix<4,4> e = forvert_kinmatik(arm);
+	struct arm_fon_fig arm_2 = invers_kinmatik(e);
+	print_arm(arm, "1:");
+	print_arm(arm_2, "2:");
+      }
+
+  
+  /*
 	tmm::Matrix<4,4> m_base(m_base_ra);
 	tmm::Matrix<4,4> rr = rot_x(0.1);
 	l.printTo(Serial);
 
 	l = l*m_base*rr;
 
-	/*
 	   for(int i = 0; i < 255; i++)
 	   {
 	   albuge.write(i);
 	   Serial.println(i);
 	   delay(100);
-
 	   }
-
-
 
 	   for(int i = 0; i < 255; i++)
 	   {
