@@ -4,7 +4,7 @@
 
 float base_link = 0.05;
 float uper_arm_link = 0.1;
-float under_arm_link = 0.11;
+float under_arm_link = 0.05;
 
 Servo klo;
 Servo albuge;
@@ -67,7 +67,9 @@ struct arm_fon_fig
 //tmm::Matrix<4,4> forvert_kinmatik(float base, float skuller, float albuge)
 tmm::Matrix<4,4> forvert_kinmatik(struct arm_fon_fig arm)
 {
-	return trans_m(0, 0, base_link) * rot_z(arm.base) * rot_x(arm.skuller) * trans_m(0, 0, uper_arm_link) * rot_x(arm.albuge) * trans_m(0, 0, under_arm_link) * rot_x(-(arm.albuge+arm.skuller));
+  //The negative rotation and first Y rotation are defined this way because, without an initial positive rotation, you can directly use atan2 to recover the angle.
+  //This aligns with the intuition you get when physically rotating the joint arm.
+	return trans_m(0, 0, base_link) * rot_z(arm.base) * rot_y(-arm.skuller) * trans_m(0, 0, uper_arm_link) * rot_y(-arm.albuge) * trans_m(0, 0, under_arm_link) * rot_y(arm.albuge+arm.skuller);
 }
 
 float extrag_skaler(tmm::Matrix<4,4> m, int x, int y)
@@ -125,38 +127,51 @@ void setup()
 void print_arm(struct arm_fon_fig a, String pra_fix)
 {
 	Serial.print(pra_fix);
-	Serial.print("b:");
-	Serial.print(a.base);
-	Serial.print("\t s:");
-	Serial.print(a.skuller);
-	Serial.print("\t a:");
+	//Serial.print("b:");
+	//Serial.print(a.base);
+	//Serial.print("\ts:");
+	//Serial.print(a.skuller);
+	//Serial.print("\ta:");
 	Serial.print(a.albuge);
-	Serial.print("\t k:");
-	Serial.print(a.klo);
-	Serial.print("\n");
+	//Serial.print("\tk:");
+	//Serial.print(a.klo);
 }
 
 
 void loop()
 {
-  for(float b = -PI; b < PI; b = b +0.1)
-    for(float s = -PI; s < PI; s = s +0.1)
-      for(float a = -PI; a < PI; s = a +0.1)
-      {
-        struct arm_fon_fig arm = {b,s,a,0};
-	tmm::Matrix<4,4> e = forvert_kinmatik(arm);
-	struct arm_fon_fig arm_2 = invers_kinmatik(e);
-	print_arm(arm, "1:");
-	print_arm(arm_2, "2:");
-      }
-
-  
   /*
-	tmm::Matrix<4,4> m_base(m_base_ra);
-	tmm::Matrix<4,4> rr = rot_x(0.1);
-	l.printTo(Serial);
+  for(float b = -PI; b < PI; b = b +0.01)
+  {
+            struct arm_fon_fig arm = {b,1,0,0};
+            tmm::Matrix<4,4> e = forvert_kinmatik(arm);
+            struct arm_fon_fig arm_2 = invers_kinmatik(e);
+            print_arm(arm, "\n1:");
+            print_arm(arm_2, "\t2:");
 
-	l = l*m_base*rr;
+    
+   }
+   */
+  
+	Serial.println("-----------------------------");
+	for(float b = -PI; b < PI; b = b +0.2)
+		for(float s = -PI; s < PI; s = s +0.2)
+			for(float a = -PI; a < PI; a = a +0.2)
+			{
+				struct arm_fon_fig arm = {b,s,a,0};
+				tmm::Matrix<4,4> e = forvert_kinmatik(arm);
+				struct arm_fon_fig arm_2 = invers_kinmatik(e);
+				print_arm(arm, "\n1:");
+				print_arm(arm_2, "\t2:");
+			}
+	delay(100000);
+
+	/*
+	   tmm::Matrix<4,4> m_base(m_base_ra);
+	   tmm::Matrix<4,4> rr = rot_x(0.1);
+	   l.printTo(Serial);
+
+	   l = l*m_base*rr;
 
 	   for(int i = 0; i < 255; i++)
 	   {
