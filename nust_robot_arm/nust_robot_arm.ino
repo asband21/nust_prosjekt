@@ -102,6 +102,8 @@ struct arm_fon_fig invers_kinmatik(tmm::Matrix<4,4> end_pos)
 	float tre_skuller = asin(under_arm_link*sin(tre_albuge)/(sqrt(x*x +y*y +z*z)));
 	// finde lige vinkel til end efter;
 	arm.skuller = atan2(z, sqrt(x*x + y*y)) + tre_skuller;
+  if(isnan(arm.albuge)) arm.albuge = 0;
+  if(isnan(arm.skuller)) arm.skuller = 0;
 	return arm;
 } 
 
@@ -111,7 +113,7 @@ void setup()
 	tmm::Matrix<4,4> m_base(m_base_ra);
 	skulle.attach( 2, 25, 190); // pwm 25-190 -> vinkel -45 - 70 
 	albuge.attach( 3,  0, 150); // pwm 0 -150 -> vinkel  30 - 150
-	klo.attach   ( 4, 40, 80 );    // pwm 40-190 -> vinkel   0 - 80
+	klo.attach   ( 4, 40, 80 ); // pwm 40-190 -> vinkel   0 - 80
 
 	skulle.write(110);
 	albuge.write(110);
@@ -130,9 +132,9 @@ void print_arm(struct arm_fon_fig a, String pra_fix)
 	//Serial.print("b:");
 	//Serial.print(a.base);
 	//Serial.print("\ts:");
-	//Serial.print(a.skuller);
+	Serial.print(a.skuller);
 	//Serial.print("\ta:");
-	Serial.print(a.albuge);
+	//Serial.print(a.albuge);
 	//Serial.print("\tk:");
 	//Serial.print(a.klo);
 }
@@ -141,9 +143,10 @@ void print_arm(struct arm_fon_fig a, String pra_fix)
 void loop()
 {
   /*
+   */
   for(float b = -PI; b < PI; b = b +0.01)
   {
-            struct arm_fon_fig arm = {b,1,0,0};
+            struct arm_fon_fig arm = {0,b,0,0};
             tmm::Matrix<4,4> e = forvert_kinmatik(arm);
             struct arm_fon_fig arm_2 = invers_kinmatik(e);
             print_arm(arm, "\n1:");
@@ -151,8 +154,8 @@ void loop()
 
     
    }
-   */
   
+	/*
 	Serial.println("-----------------------------");
 	for(float b = -PI; b < PI; b = b +0.2)
 		for(float s = -PI; s < PI; s = s +0.2)
@@ -166,7 +169,6 @@ void loop()
 			}
 	delay(100000);
 
-	/*
 	   tmm::Matrix<4,4> m_base(m_base_ra);
 	   tmm::Matrix<4,4> rr = rot_x(0.1);
 	   l.printTo(Serial);
